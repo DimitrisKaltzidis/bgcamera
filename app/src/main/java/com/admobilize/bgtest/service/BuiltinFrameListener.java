@@ -69,12 +69,12 @@ public class BuiltinFrameListener implements SurfaceHolder.Callback, Camera.Prev
 
             if (mIsCameraOrientationActive && mOrientation != 0) {
                 if (frameData != null) {
-//                    jni.faceDetectionAndRotate(mWidth, mHeight, frameData, mOrientation);
+                    Log.i(TAG,"frame from native library: "+((BuiltinCameraService)(ctx)).stringFromJNI(frameData));
                 }
 
             } else {
                 if (frameData != null) {
-//                    jni.faceDetection(mWidth, mHeight, frameData);
+                    Log.i(TAG,"frame from native library: "+((BuiltinCameraService)(ctx)).stringFromJNI(frameData));
                 }
             }
             bProcessing = false;
