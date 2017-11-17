@@ -21,7 +21,7 @@ public class MainActivity extends AppCompatActivity {
         ServiceScheduler.startScheduleService(this, 5*1000);
 
         TextView tv = (TextView) findViewById(R.id.sample_text);
-        tv.setText("Camera on background test, please close this activity..");
+        tv.setText("Camera on background test, please close this activity and check logs via ADB");
     }
 
 
