@@ -2,6 +2,8 @@ package com.admobilize.bgapi2;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.Image;
 import android.media.ImageReader;
 import android.os.Handler;
@@ -64,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private int count;
     /**
      * Listener for new camera images.
      */
@@ -71,14 +74,18 @@ public class MainActivity extends AppCompatActivity {
             new ImageReader.OnImageAvailableListener() {
         @Override
         public void onImageAvailable(ImageReader reader) {
-            Log.d(TAG,"onImageAvailable..");
             Image image = reader.acquireLatestImage();
             // get image bytes
             ByteBuffer imageBuf = image.getPlanes()[0].getBuffer();
             final byte[] imageBytes = new byte[imageBuf.remaining()];
             imageBuf.get(imageBytes);
+            Bitmap bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+            if(count++==5){
+                Log.i(TAG,"100 frames reached");
+                count=0;
+            }
+//            frameData = FileTools.getNV21(bitmap.getWidth(), bitmap.getHeight(), bitmap);
             image.close();
-
 //            onPictureTaken(imageBytes);
         }
     };

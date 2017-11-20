@@ -204,7 +204,7 @@ public class Api2Camera {
      */
     protected CaptureRequest createCaptureRequest() {
         try {
-            CaptureRequest.Builder builder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_RECORD);
+            CaptureRequest.Builder builder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
             builder.addTarget(mImageReader.getSurface());
             return builder.build();
         } catch (CameraAccessException e) {
