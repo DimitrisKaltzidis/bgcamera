@@ -63,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
         // Example of a call to a native method
+        Log.d(TAG,"starting service..");
         Intent newIntent = new Intent(this, CameraService.class);
         startService(newIntent);
         ServiceScheduler.startScheduleService(this, 5*1000);
