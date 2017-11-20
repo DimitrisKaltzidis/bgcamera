@@ -1,4 +1,4 @@
-package com.admobilize.libframeprocess;
+package com.admobilize.lib;
 
 import org.junit.Test;
 

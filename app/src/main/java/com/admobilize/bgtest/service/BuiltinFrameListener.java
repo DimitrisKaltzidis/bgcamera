@@ -9,6 +9,8 @@ import android.os.Looper;
 import android.util.Log;
 import android.view.SurfaceHolder;
 
+import com.admobilize.lib.NativeProcess;
+
 import java.io.IOException;
 
 /**
@@ -26,6 +28,7 @@ public class BuiltinFrameListener implements SurfaceHolder.Callback, Camera.Prev
     private final int mHeight;
 
     private final Context ctx;
+    private final NativeProcess np;
     private Camera mCamera;
     private int imageFormat;
     private byte[] frameData;
@@ -43,6 +46,7 @@ public class BuiltinFrameListener implements SurfaceHolder.Callback, Camera.Prev
         this.mWidth = width;
         this.mHeight = height;
         this.ctx = ctx;
+        np = new NativeProcess();
     }
 
     @Override
@@ -70,12 +74,12 @@ public class BuiltinFrameListener implements SurfaceHolder.Callback, Camera.Prev
 
             if (mIsCameraOrientationActive && mOrientation != 0) {
                 if (frameData != null) {
-                    Log.i(TAG,"frame from native library: "+((BuiltinCameraService)(ctx)).stringFromJNI(frameData));
+                    Log.i(TAG,"frame from native library: "+np.stringFromJNI(frameData));
                 }
 
             } else {
                 if (frameData != null) {
-                    Log.i(TAG,"frame from native library: "+((BuiltinCameraService)(ctx)).stringFromJNI(frameData));
+                    Log.i(TAG,"frame from native library: "+np.stringFromJNI(frameData));
                 }
             }
             bProcessing = false;

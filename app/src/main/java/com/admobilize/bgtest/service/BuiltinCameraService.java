@@ -6,7 +6,6 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 
-
 /**
  * Created by Antonio Vanegas @hpsaturn on 4/3/17.
  */
@@ -71,17 +70,5 @@ public class BuiltinCameraService extends Service {
             return BuiltinCameraService.this;
         }
     }
-
-    // Used to load the 'native-lib' library on application startup.
-    static {
-        System.loadLibrary("native-lib");
-    }
-
-    /**
-     * A native method that is implemented by the 'native-lib' native library,
-     * which is packaged with this application.
-     */
-    public native String stringFromJNI(byte[] frame);
-
 
 }
