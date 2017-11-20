@@ -106,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mCamera.shutDown();
-        mCameraThread.quitSafely();
+//        mCamera.shutDown();
+//        mCameraThread.quitSafely();
     }
 }
