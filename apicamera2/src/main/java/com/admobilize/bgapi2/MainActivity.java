@@ -1,6 +1,7 @@
 package com.admobilize.bgapi2;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -12,7 +13,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.admobilize.bgapi2.receivers.ServiceScheduler;
+import com.admobilize.bgapi2.service.CameraService;
+
 import java.nio.ByteBuffer;
+
+
+/**
+ * Created by Antonio Vanegas @hpsaturn on 2017.11.19.
+ */
 
 public class MainActivity extends AppCompatActivity {
 
@@ -53,15 +62,19 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG, "No permission");
             return;
         }
+        // Example of a call to a native method
+        Intent newIntent = new Intent(this, CameraService.class);
+        startService(newIntent);
+        ServiceScheduler.startScheduleService(this, 5*1000);
 
-        mCameraThread = new HandlerThread("CameraBackground");
-        mCameraThread.start();
-        mCameraHandler = new Handler(mCameraThread.getLooper());
-
-        // Camera code is complicated, so we've shoved it all in this closet class for you.
-        mCamera = Api2Camera.getInstance();
-        mCamera.initializeCamera(this, mCameraHandler, mOnImageAvailableListener);
-
+//        mCameraThread = new HandlerThread("CameraBackground");
+//        mCameraThread.start();
+//        mCameraHandler = new Handler(mCameraThread.getLooper());
+//
+//         Camera code is complicated, so we've shoved it all in this closet class for you.
+//        mCamera = Api2Camera.getInstance();
+//        mCamera.initializeCamera(this, mCameraHandler, mOnImageAvailableListener);
+//
 
 
     }
@@ -81,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
             imageBuf.get(imageBytes);
             Bitmap bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
             if(count++==5){
-                Log.i(TAG,"100 frames reached");
+                Log.i(TAG,"5 frames reached");
                 count=0;
             }
 //            frameData = FileTools.getNV21(bitmap.getWidth(), bitmap.getHeight(), bitmap);

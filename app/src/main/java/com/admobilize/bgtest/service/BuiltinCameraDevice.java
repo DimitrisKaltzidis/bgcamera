@@ -8,7 +8,7 @@ import android.view.WindowManager;
 
 
 /**
- * Created by Antonio Vanegas @hpsaturn on 4/3/17.
+ * Created by Antonio Vanegas @hpsaturn on 2017.11.19.
  */
 
 public class BuiltinCameraDevice  {

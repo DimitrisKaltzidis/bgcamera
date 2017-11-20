@@ -8,6 +8,10 @@ import android.widget.TextView;
 import com.admobilize.bgtest.receivers.ServiceScheduler;
 import com.admobilize.bgtest.service.BuiltinCameraService;
 
+/**
+ * Created by Antonio Vanegas @hpsaturn on 2017.11.19.
+ */
+
 public class MainActivity extends AppCompatActivity {
 
     @Override

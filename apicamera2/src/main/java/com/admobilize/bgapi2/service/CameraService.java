@@ -1,4 +1,4 @@
-package com.admobilize.bgtest.service;
+package com.admobilize.bgapi2.service;
 
 import android.app.Service;
 import android.content.Intent;
@@ -8,15 +8,24 @@ import android.util.Log;
 
 
 /**
- * Created by Antonio Vanegas @hpsaturn on 4/3/17.
+ * Created by Antonio Vanegas @hpsaturn on 2017.11.19.
  */
 
-public class BuiltinCameraService extends Service {
+public class CameraService extends Service {
 
-    private static final String TAG = BuiltinCameraService.class.getSimpleName();
-    private BuiltinCameraDevice camera;
+    private static final String TAG = CameraService.class.getSimpleName();
+
+    //stop messages
+    private static final String MESSAGE_SERVICE_STOP = "service_stop";
+
+
+
+    private final IBinder mBinder = new CameraService.LocalBinder();
+    private CameraDevice camera;
+
     private boolean isDetectionRunning;
-    private final IBinder mBinder = new BuiltinCameraService.LocalBinder();
+
+
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -33,7 +42,7 @@ public class BuiltinCameraService extends Service {
         }
 
         isDetectionRunning = true;
-        camera = new BuiltinCameraDevice(this, 640, 480);
+        camera = new CameraDevice(this, 320,240 );
         camera.setCameraOrientation(0);
         camera.allowCameraOrientation(false);
 
@@ -54,6 +63,7 @@ public class BuiltinCameraService extends Service {
         Log.i(TAG, "Detection is Finished.");
     }
 
+
     @Override
     public IBinder onBind(Intent intent) {
         Log.i(TAG, "onBind");
@@ -62,26 +72,17 @@ public class BuiltinCameraService extends Service {
 
     @Override
     public void onDestroy() {
-        handleStopTrackingCommand("");
+        handleStopTrackingCommand(MESSAGE_SERVICE_STOP);
         super.onDestroy();
     }
 
+    //returns the instance of the service
     public class LocalBinder extends Binder {
-        public BuiltinCameraService getServiceInstance() {
-            return BuiltinCameraService.this;
+        public CameraService getServiceInstance() {
+            return CameraService.this;
         }
     }
 
-    // Used to load the 'native-lib' library on application startup.
-    static {
-        System.loadLibrary("native-lib");
-    }
-
-    /**
-     * A native method that is implemented by the 'native-lib' native library,
-     * which is packaged with this application.
-     */
-    public native String stringFromJNI(byte[] frame);
 
 
 }

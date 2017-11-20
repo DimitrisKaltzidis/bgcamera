@@ -45,7 +45,7 @@ public class Api2Camera {
 
     private static final int IMAGE_WIDTH = 320;
     private static final int IMAGE_HEIGHT = 240;
-    private static final int MAX_IMAGES = 1;
+    private static final int MAX_IMAGES = 2;
 
     private CameraDevice mCameraDevice;
 

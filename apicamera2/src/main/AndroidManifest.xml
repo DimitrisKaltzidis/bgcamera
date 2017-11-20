@@ -20,7 +20,7 @@
         </activity>
 
         <service
-            android:name=".MainService"
+            android:name=".service.CameraService"
             android:enabled="true"
             android:exported="true" />
 
