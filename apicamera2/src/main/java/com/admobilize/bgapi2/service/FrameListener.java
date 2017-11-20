@@ -2,6 +2,7 @@ package com.admobilize.bgapi2.service;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.ImageFormat;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
@@ -14,6 +15,8 @@ import android.media.ImageReader;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.util.Log;
+
+import com.admobilize.lib.NativeProcess;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -29,6 +32,7 @@ public class FrameListener {
 
     public static final int PORTRAIT = 270;
     public static final int LEFT_LANDSCAPE = 0;
+    private final NativeProcess np;
     private Bitmap bitmap;
 
     private int mOrientation = PORTRAIT;
@@ -48,6 +52,7 @@ public class FrameListener {
         this.mHeight = height;
         this.ctx = ctx;
         mHandler = new Handler();
+        np = new  NativeProcess();
         startCamera();
     }
 
@@ -120,13 +125,12 @@ public class FrameListener {
                     ByteBuffer buffer = image.getPlanes()[0].getBuffer();
                     byte[] bytes = new byte[buffer.capacity()];
                     buffer.get(bytes);
-//                    bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-//                    frameData = FileTools.getNV21(bitmap.getWidth(), bitmap.getHeight(), bitmap);
+                    bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                    frameData = ImageUtils.getNV21(bitmap.getWidth(), bitmap.getHeight(), bitmap);
 
                     if (mFrameCallback != null) {
                         mFrameCallback.onFrame(frameData);
                     }
-                    isProcessing = true;
                     mHandler.post(doImageTracker);
 
                     if(count++==sample){
@@ -266,12 +270,8 @@ public class FrameListener {
 
     private Runnable doImageTracker = new Runnable() {
         public void run() {
-
-            if (mIsCameraOrientationActive && mOrientation != 0) {
-//                if (frameData != null) jni.faceDetectionAndRotate(mWidth, mHeight, frameData, mOrientation);
-            } else {
-//                if (frameData != null) jni.faceDetection(mWidth, mHeight, frameData);
-            }
+            isProcessing = true;
+            if (frameData != null) np.stringFromJNI(frameData);
             isProcessing = false;
         }
     };
