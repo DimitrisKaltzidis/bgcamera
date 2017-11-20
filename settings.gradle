@@ -1,1 +1,1 @@
-include ':app', ':apicamera2'
+include ':app', ':apicamera2', ':libframeprocess'

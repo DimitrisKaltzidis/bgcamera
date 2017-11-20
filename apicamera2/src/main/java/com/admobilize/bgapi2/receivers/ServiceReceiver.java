@@ -5,7 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
-import com.admobilize.bgapi2.MainService;
+import com.admobilize.bgapi2.service.CameraService;
 
 
 /**
@@ -18,7 +18,7 @@ public class ServiceReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.d(TAG,"StartServiceReceiver: onReceive");
-        Intent service = new Intent(context, MainService.class);
+        Intent service = new Intent(context, CameraService.class);
         context.startService(service);
     }
 

@@ -5,6 +5,7 @@
       <module fileurl="file://$PROJECT_DIR$/apicamera2/apicamera2.iml" filepath="$PROJECT_DIR$/apicamera2/apicamera2.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/bgcamera.iml" filepath="$PROJECT_DIR$/bgcamera.iml" />
+      <module fileurl="file://$PROJECT_DIR$/libframeprocess/libframeprocess.iml" filepath="$PROJECT_DIR$/libframeprocess/libframeprocess.iml" />
     </modules>
   </component>
 </project>
