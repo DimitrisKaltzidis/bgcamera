@@ -12,7 +12,7 @@ JNIEXPORT jstring
 
 JNICALL
 Java_com_admobilize_bgtest_service_BuiltinCameraService_stringFromJNI(JNIEnv *env, jobject obj, jbyteArray frame) {
-    size_t length = (size_t) env->GetArrayLength(frame);
+    int length = (int) env->GetArrayLength(frame);
     jbyte *pFrameData = env->GetByteArrayElements(frame, 0);
     std::string ret = std::string((char *)pFrameData, length);
     LOGI("frame lenght :%d", length );
