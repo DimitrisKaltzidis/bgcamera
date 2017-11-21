@@ -23,7 +23,6 @@ public class BuiltinFrameListener implements SurfaceHolder.Callback, Camera.Prev
     public static final String TAG = BuiltinFrameListener.class.getSimpleName();
 
     public static final int LEFT_LANDSCAPE = 0;
-    private static int mCameraIdx;
     private final int mWidth;
     private final int mHeight;
 
@@ -32,15 +31,11 @@ public class BuiltinFrameListener implements SurfaceHolder.Callback, Camera.Prev
     private Camera mCamera;
     private int imageFormat;
     private byte[] frameData;
-    private boolean bProcessing = false;
+    private boolean bProcessing;
     private int mOrientation = LEFT_LANDSCAPE;
 
     Handler mHandler = new Handler(Looper.getMainLooper());
-    private boolean cameraRunning;
-    private byte[] previewFrame;
     private boolean mIsCameraOrientationActive;
-    private FrameCallbck mFrameCallback;
-    private int cameraId = 0;
 
     public BuiltinFrameListener(Context ctx, int width, int height) {
         this.mWidth = width;
@@ -55,17 +50,21 @@ public class BuiltinFrameListener implements SurfaceHolder.Callback, Camera.Prev
             mCamera = getCameraInstance();
             if (mCamera != null) {
                 try {
+                    Log.d(TAG, "[camera] setPreview holder..");
                     mCamera.setPreviewDisplay(holder);
+                    Log.d(TAG, "[camera] setPreview callback..");
                     mCamera.setPreviewCallback(this);
+                    Log.d(TAG, "[camera] setPreview done.");
                 } catch (IOException e) {
+                    Log.e(TAG, "[camera] setPreview IOException: "+e.getMessage());
                     mCamera.release();
                     mCamera = null;
                 }
             } else {
-                Log.e(TAG, "Get Camera from service failed");
+                Log.e(TAG, "[camera] Get Camera from service failed");
             }
         } else {
-            Log.e(TAG, "There is no camera hardware on device.");
+            Log.e(TAG, "[camera] There is no camera hardware on device.");
         }
     }
 
@@ -74,12 +73,12 @@ public class BuiltinFrameListener implements SurfaceHolder.Callback, Camera.Prev
 
             if (mIsCameraOrientationActive && mOrientation != 0) {
                 if (frameData != null) {
-                    Log.i(TAG,"frame from native library: "+np.stringFromJNI(frameData));
+                    Log.i(TAG,"[camera] frame from native library: "+np.stringFromJNI(frameData));
                 }
 
             } else {
                 if (frameData != null) {
-                    Log.i(TAG,"frame from native library: "+np.stringFromJNI(frameData));
+                    Log.i(TAG,"[camera] frame from native library: "+np.stringFromJNI(frameData));
                 }
             }
             bProcessing = false;
@@ -104,7 +103,6 @@ public class BuiltinFrameListener implements SurfaceHolder.Callback, Camera.Prev
                 imageFormat = parameters.getPreviewFormat();
                 mCamera.setParameters(parameters);
                 mCamera.startPreview();
-                cameraRunning = true;
             } catch (Exception e) {
                 Log.e(TAG, e.getMessage());
             }
@@ -120,9 +118,7 @@ public class BuiltinFrameListener implements SurfaceHolder.Callback, Camera.Prev
         mCamera.setPreviewCallback(null);
         mCamera.stopPreview();
         mCamera.release();
-        previewFrame = null;
         mCamera = null;
-        cameraRunning = false;
     }
 
     @Override
@@ -132,7 +128,6 @@ public class BuiltinFrameListener implements SurfaceHolder.Callback, Camera.Prev
             //We only accept the NV21(YUV420) format.
             if (!bProcessing) {
                 frameData = data;
-                if (mFrameCallback != null) mFrameCallback.onFrame();
                 bProcessing = true;
                 mHandler.post(DoImageTracker);
             }
@@ -149,7 +144,6 @@ public class BuiltinFrameListener implements SurfaceHolder.Callback, Camera.Prev
             mCamera.stopPreview();
             mCamera.release();
         }
-        previewFrame = null;
         mCamera = null;
     }
 
@@ -164,7 +158,6 @@ public class BuiltinFrameListener implements SurfaceHolder.Callback, Camera.Prev
                 if (cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
                     try {
                         c = Camera.open(camIdx);
-                        mCameraIdx = camIdx;
                         Log.i(TAG, "[Camera] camIdx:" + camIdx);
                     } catch (RuntimeException e) {
                         Log.e(TAG, "[Camera] failed to open: " + e.getLocalizedMessage());
@@ -175,7 +168,7 @@ public class BuiltinFrameListener implements SurfaceHolder.Callback, Camera.Prev
             if (c == null) {
                 Log.i(TAG, "[Camera] forcing open camera with camIdx 0");
                 c = Camera.open(0); // force because FACING_FRONT not found
-                mCameraIdx = 0;
+                Log.i(TAG, "[Camera] open done.");
             }
         } catch (Exception e) {
             Log.e("TAG", "[Camera] Open camera failed: " + e);
@@ -210,7 +203,4 @@ public class BuiltinFrameListener implements SurfaceHolder.Callback, Camera.Prev
         void onFrame();
     }
 
-    public void setFrameCallback(FrameCallbck frameCallback) {
-        mFrameCallback = frameCallback;
-    }
 }
