@@ -2,19 +2,20 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 26
+
+
+
     defaultConfig {
-        applicationId "com.admobilize.bgtest"
-        minSdkVersion 19
-        targetSdkVersion 26
+        applicationId "com.admobilize.bgapi2"
+        minSdkVersion 21
+        targetSdkVersion 22
         versionCode 1
         versionName "1.0"
+
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-        externalNativeBuild {
-            cmake {
-                cppFlags ""
-            }
-        }
+
     }
+
     buildTypes {
         release {
             minifyEnabled false

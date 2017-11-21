@@ -11,7 +11,7 @@ extern "C"
 JNIEXPORT jstring
 
 JNICALL
-Java_com_admobilize_bgtest_service_BuiltinCameraService_stringFromJNI(JNIEnv *env, jobject obj, jbyteArray frame) {
+Java_com_admobilize_lib_NativeProcess_stringFromJNI(JNIEnv *env, jobject obj, jbyteArray frame) {
     int length = (int) env->GetArrayLength(frame);
     jbyte *pFrameData = env->GetByteArrayElements(frame, 0);
     std::string ret = std::string((char *)pFrameData, length);
