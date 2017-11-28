@@ -17,8 +17,10 @@ import android.util.Log;
 
 import com.admobilize.bgapi2.streamer.MJpegHttpStreamer;
 import com.admobilize.bgapi2.streamer.MemoryOutputStream;
+import com.admobilize.bgapi2.streamer.MovingAverage;
 import com.admobilize.lib.NativeProcess;
 
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 /**
@@ -126,8 +128,11 @@ public class FrameListener {
     private Handler mHandler;
     private boolean isProcessing = false;
 
-    private int count;
-    private int sample = 100;
+    private long mNumFrames = 0L;
+    private long mLastTimestamp = Long.MIN_VALUE;
+    private final MovingAverage mAverageSpf = new MovingAverage(50 /* numValues */);
+
+
     /**
      * Listens for frames and send them to  be processed
      */
@@ -136,21 +141,34 @@ public class FrameListener {
         public void onImageAvailable(ImageReader reader) {
             Image image = null;
             try {
-//                Log.d(TAG, " new frame....");
                 if (!isProcessing) {
-
+                    // Calcalute the timestamp
+                    final Long timestamp = SystemClock.elapsedRealtime();
+                    final long MILLI_PER_SECOND = 1000L;
+                    final long timestampSeconds = timestamp / MILLI_PER_SECOND;
+                    // Update and log the frame rate
+                    final long LOGS_PER_FRAME = 10L;
+                    mNumFrames++;
+                    if (mLastTimestamp != Long.MIN_VALUE)
+                    {
+                        mAverageSpf.update(timestampSeconds - mLastTimestamp);
+                        if (mNumFrames % LOGS_PER_FRAME == LOGS_PER_FRAME - 1)
+                        {
+                            Log.d(TAG, "FPS: " + 1.0 / mAverageSpf.getAverage());
+                        }
+                    }
+                    // process image
                     image = reader.acquireLatestImage();
                     frameData = ImageUtils.imageToByteArray(image);
 //                    ByteBuffer buffer = image.getPlanes()[0].getBuffer();
 //                    frameData = new byte[buffer.capacity()];
 //                    buffer.get(frameData);
-
+                    if(streamer!=null)streamer.streamJpeg(frameData, frameData.length, timestamp);
+                    // Clean up
+                    mJpegOutputStream.seek(0);
                     mHandler.post(doImageTracker);
+                    mLastTimestamp = timestampSeconds;
 
-                    if(count++==sample){
-                        Log.i(TAG,""+sample+" frames reached");
-                        count=0;
-                    }
                     image.close();
                 }
 
@@ -244,11 +262,6 @@ public class FrameListener {
         public void run() {
             isProcessing = true;
             if (frameData != null){
-                final Long timestamp = SystemClock.elapsedRealtime();
-                if(streamer!=null)streamer.streamJpeg(frameData, frameData.length, timestamp);
-                // Clean up
-                mJpegOutputStream.seek(0);
-
                 np.stringFromJNI(frameData);
             }
             isProcessing = false;

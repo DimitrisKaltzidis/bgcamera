@@ -23,14 +23,16 @@ public class MovingAverage
     private int mLength = 0;
     private long mSum = 0L;
 
-    /* package */ MovingAverage(final int numValues)
+    /* package */
+    public MovingAverage(final int numValues)
     {
         super();
         mNumValues = numValues;
         mValues = new long[numValues];
     } // constructor()
 
-    /* package */ void update(final long value)
+    /* package */
+    public void update(final long value)
     {
         mSum -= mValues[mEnd];
         mValues[mEnd] = value;
@@ -42,7 +44,8 @@ public class MovingAverage
         mSum += value;
     } // update(long)
 
-    /* package */ double getAverage()
+    /* package */
+    public double getAverage()
     {
         return mSum / (double) mLength;
     } // getAverage()
