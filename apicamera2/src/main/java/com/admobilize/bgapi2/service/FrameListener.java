@@ -1,8 +1,6 @@
 package com.admobilize.bgapi2.service;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.ImageFormat;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
@@ -13,12 +11,14 @@ import android.hardware.camera2.CaptureRequest;
 import android.media.Image;
 import android.media.ImageReader;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import com.admobilize.bgapi2.streamer.MJpegHttpStreamer;
+import com.admobilize.bgapi2.streamer.MemoryOutputStream;
 import com.admobilize.lib.NativeProcess;
 
-import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 /**
@@ -44,7 +44,15 @@ public class FrameListener {
     private byte[] frameData;
     private boolean cameraRunning;
 
+    private MemoryOutputStream mJpegOutputStream;
+    private int mPreviewBufferSize;
+    private MJpegHttpStreamer streamer;
+    private int mPreviewWidth = 640;
+    private int mPreviewHeight = 480;
+
+
     public FrameListener(Context ctx, int width, int height) {
+        initStreamer();
         this.mWidth = width;
         this.mHeight = height;
         this.ctx = ctx;
@@ -119,9 +127,14 @@ public class FrameListener {
                 if (!isProcessing) {
 
                     image = reader.acquireLatestImage();
-                    ByteBuffer buffer = image.getPlanes()[0].getBuffer();
-                    frameData = new byte[buffer.capacity()];
-                    buffer.get(frameData);
+                    frameData = ImageUtils.imageToByteArray(image);
+//                    ByteBuffer buffer = image.getPlanes()[0].getBuffer();
+//                    frameData = new byte[buffer.capacity()];
+//                    buffer.get(frameData);
+                    final Long timestamp = SystemClock.elapsedRealtime();
+                    if(streamer!=null)streamer.streamJpeg(frameData, frameData.length, timestamp);
+                    // Clean up
+                    mJpegOutputStream.seek(0);
 
                     mHandler.post(doImageTracker);
 
@@ -262,5 +275,16 @@ public class FrameListener {
             isProcessing = false;
         }
     };
+
+    private void initStreamer() {
+        // streamer
+        final int BITS_PER_BYTE = 8;
+        final int bytesPerPixel = ImageFormat.getBitsPerPixel(ImageFormat.YUV_420_888) / BITS_PER_BYTE;
+        mPreviewBufferSize = mPreviewWidth * mPreviewHeight * bytesPerPixel * 3 / 2 + 1;
+        mJpegOutputStream = new MemoryOutputStream(mPreviewBufferSize);
+        streamer = new MJpegHttpStreamer(8080, mPreviewBufferSize);
+        streamer.start();
+
+    }
 
 }
