@@ -15,20 +15,6 @@ public class CameraDevice {
         mBuiltFrame = new FrameListener(ctx, width, height);
     }
 
-
-    public void setCameraOrientation(int orientation){
-        mBuiltFrame.setOrientation(orientation);
-
-    }
-
-    public void allowCameraOrientation(boolean isAllowed){
-        mBuiltFrame.allowCameraOrientation(isAllowed);
-    }
-
-    public boolean isCameraOrientationChangeAllowed( ){
-        return   mBuiltFrame.isCameraOrientationChangeAllowed();
-    }
-
     public void stop (){
         mBuiltFrame.onStop();
     }

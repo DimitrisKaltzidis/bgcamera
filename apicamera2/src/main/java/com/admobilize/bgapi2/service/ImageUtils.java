@@ -84,21 +84,37 @@ public class ImageUtils {
 
     private static byte[] YUV_420_888toNV21(Image image) {
         byte[] nv21;
-        ByteBuffer yBuffer = image.getPlanes()[0].getBuffer();
-        ByteBuffer uBuffer = image.getPlanes()[1].getBuffer();
-        ByteBuffer vBuffer = image.getPlanes()[2].getBuffer();
+//        ByteBuffer yBuffer = image.getPlanes()[0].getBuffer();
+//        ByteBuffer uBuffer = image.getPlanes()[1].getBuffer();
+//        ByteBuffer vBuffer = image.getPlanes()[2].getBuffer();
+//
+//        int ySize = yBuffer.remaining();
+//        int uSize = uBuffer.remaining();
+//        int vSize = vBuffer.remaining();
+//
+//        nv21 = new byte[ySize + uSize + vSize];
+//
+//        U and V are swapped
+//        yBuffer.get(nv21, 0, ySize);
+//        vBuffer.get(nv21, ySize, vSize);
+//        uBuffer.get(nv21, ySize + vSize, uSize);
 
-        int ySize = yBuffer.remaining();
-        int uSize = uBuffer.remaining();
-        int vSize = vBuffer.remaining();
+        Image.Plane Y = image.getPlanes()[0];
+        Image.Plane U = image.getPlanes()[1];
+        Image.Plane V = image.getPlanes()[2];
 
-        nv21 = new byte[ySize + uSize + vSize];
+        int Yb = Y.getBuffer().remaining();
+        int Ub = U.getBuffer().remaining();
+        int Vb = V.getBuffer().remaining();
 
-        //U and V are swapped
-        yBuffer.get(nv21, 0, ySize);
-        vBuffer.get(nv21, ySize, vSize);
-        uBuffer.get(nv21, ySize + vSize, uSize);
+        nv21 = new byte[Yb + Ub + Vb];
+        //your data length should be this byte array length.
 
+        Y.getBuffer().get(nv21, 0, Yb);
+        U.getBuffer().get(nv21, Yb, Ub);
+        V.getBuffer().get(nv21, Yb+ Ub, Vb);
+//            final int width = image.getWidth();
+//            final int height = image.getHeight();
         return nv21;
     }
 

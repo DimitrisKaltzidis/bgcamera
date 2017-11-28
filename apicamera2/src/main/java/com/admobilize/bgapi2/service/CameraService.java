@@ -18,13 +18,9 @@ public class CameraService extends Service {
     //stop messages
     private static final String MESSAGE_SERVICE_STOP = "service_stop";
 
-
-
     private final IBinder mBinder = new CameraService.LocalBinder();
     private CameraDevice camera;
-
     private boolean isDetectionRunning;
-
 
 
     @Override
@@ -42,10 +38,7 @@ public class CameraService extends Service {
         }
 
         isDetectionRunning = true;
-        camera = new CameraDevice(this, 320,240 );
-        camera.setCameraOrientation(0);
-        camera.allowCameraOrientation(false);
-
+        camera = new CameraDevice(this, 640,480 );
         Log.d(TAG, "-->camera start");
     }
 

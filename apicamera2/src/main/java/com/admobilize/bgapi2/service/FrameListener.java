@@ -33,7 +33,6 @@ public class FrameListener {
     public static final int PORTRAIT = 270;
     private final NativeProcess np;
 
-    private int mOrientation = PORTRAIT;
     private final int mWidth;
     private final int mHeight;
     private final Context ctx;
@@ -47,14 +46,12 @@ public class FrameListener {
     private MemoryOutputStream mJpegOutputStream;
     private int mPreviewBufferSize;
     private MJpegHttpStreamer streamer;
-    private int mPreviewWidth = 640;
-    private int mPreviewHeight = 480;
 
 
     public FrameListener(Context ctx, int width, int height) {
-        initStreamer();
         this.mWidth = width;
         this.mHeight = height;
+        initStreamer();
         this.ctx = ctx;
         mHandler = new Handler();
         np = new  NativeProcess();
@@ -89,11 +86,10 @@ public class FrameListener {
      */
     protected CameraCaptureSession.StateCallback sessionStateCallback = new CameraCaptureSession.StateCallback() {
 
-        public CameraCaptureSession session;
 
         @Override
         public void onReady(CameraCaptureSession session) {
-            this.session = session;
+            mSession = session;
             try {
                 session.setRepeatingRequest(createCaptureRequest(), null, null);
             } catch (CameraAccessException e) {
@@ -109,6 +105,23 @@ public class FrameListener {
         public void onConfigureFailed(@NonNull CameraCaptureSession session) {
         }
     };
+
+
+    /**
+     * Starts a builtin camera with api camera 2
+     */
+    private void startCamera() {
+        CameraManager manager = (CameraManager) ctx.getSystemService(Context.CAMERA_SERVICE);
+        try {
+            String pickedCamera = getCamera(manager);
+            manager.openCamera(pickedCamera, cameraStateCallback, null);
+            mImageReader = ImageReader.newInstance(mWidth, mHeight, ImageFormat.YUV_420_888, 4 /* images buffered */);
+            mImageReader.setOnImageAvailableListener(onImageAvailableListener, null);
+            Log.d(TAG, "imageReader created");
+        } catch (CameraAccessException e) {
+            Log.e(TAG, e.getMessage());
+        }
+    }
 
     private Handler mHandler;
     private boolean isProcessing = false;
@@ -131,10 +144,6 @@ public class FrameListener {
 //                    ByteBuffer buffer = image.getPlanes()[0].getBuffer();
 //                    frameData = new byte[buffer.capacity()];
 //                    buffer.get(frameData);
-                    final Long timestamp = SystemClock.elapsedRealtime();
-                    if(streamer!=null)streamer.streamJpeg(frameData, frameData.length, timestamp);
-                    // Clean up
-                    mJpegOutputStream.seek(0);
 
                     mHandler.post(doImageTracker);
 
@@ -156,21 +165,6 @@ public class FrameListener {
         }
     };
 
-    /**
-     * Starts a builtin camera with api camera 2
-     */
-    private void startCamera() {
-        CameraManager manager = (CameraManager) ctx.getSystemService(Context.CAMERA_SERVICE);
-        try {
-            String pickedCamera = getCamera(manager);
-            manager.openCamera(pickedCamera, cameraStateCallback, null);
-            mImageReader = ImageReader.newInstance(mWidth, mHeight, ImageFormat.YUV_420_888, 2 /* images buffered */);
-            mImageReader.setOnImageAvailableListener(onImageAvailableListener, null);
-            Log.d(TAG, "imageReader created");
-        } catch (CameraAccessException e) {
-            Log.e(TAG, e.getMessage());
-        }
-    }
 
     /**
      * Gets a camera available
@@ -246,32 +240,17 @@ public class FrameListener {
 
     }
 
-
-    public boolean isCameraRunning() {
-        return cameraRunning;
-    }
-
-    public void setOrientation(int orientation) {
-        Log.d(TAG, "new orientation " + orientation);
-        mOrientation = orientation;
-    }
-
-    public void allowCameraOrientation(boolean isAllowed) {
-        mIsCameraOrientationActive = isAllowed;
-    }
-
-    public boolean isCameraOrientationChangeAllowed() {
-        return mIsCameraOrientationActive;
-    }
-
-    public interface FrameCallback {
-        void onFrame(byte[] frame);
-    }
-
     private Runnable doImageTracker = new Runnable() {
         public void run() {
             isProcessing = true;
-            if (frameData != null) np.stringFromJNI(frameData);
+            if (frameData != null){
+                final Long timestamp = SystemClock.elapsedRealtime();
+                if(streamer!=null)streamer.streamJpeg(frameData, frameData.length, timestamp);
+                // Clean up
+                mJpegOutputStream.seek(0);
+
+                np.stringFromJNI(frameData);
+            }
             isProcessing = false;
         }
     };
@@ -280,11 +259,10 @@ public class FrameListener {
         // streamer
         final int BITS_PER_BYTE = 8;
         final int bytesPerPixel = ImageFormat.getBitsPerPixel(ImageFormat.YUV_420_888) / BITS_PER_BYTE;
-        mPreviewBufferSize = mPreviewWidth * mPreviewHeight * bytesPerPixel * 3 / 2 + 1;
+        mPreviewBufferSize = mWidth * mHeight * bytesPerPixel * 3 / 2 + 1;
         mJpegOutputStream = new MemoryOutputStream(mPreviewBufferSize);
         streamer = new MJpegHttpStreamer(8080, mPreviewBufferSize);
         streamer.start();
-
     }
 
 }
