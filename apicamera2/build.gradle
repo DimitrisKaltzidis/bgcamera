@@ -2,14 +2,11 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 26
-
-
-
     defaultConfig {
         applicationId "com.admobilize.bgapi2"
         minSdkVersion 21
         targetSdkVersion 22
-        versionCode 21
+        versionCode 22
         versionName "1.1"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"

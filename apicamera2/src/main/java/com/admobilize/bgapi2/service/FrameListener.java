@@ -31,20 +31,17 @@ public class FrameListener {
     protected static final int CAMERACHOICE = CameraCharacteristics.LENS_FACING_BACK;
 
     public static final int PORTRAIT = 270;
-    public static final int LEFT_LANDSCAPE = 0;
     private final NativeProcess np;
-    private Bitmap bitmap;
 
     private int mOrientation = PORTRAIT;
     private final int mWidth;
     private final int mHeight;
     private final Context ctx;
-    protected CameraDevice mCameraDevice;
-    protected CameraCaptureSession mSession;
-    protected ImageReader mImageReader;
+    private CameraDevice mCameraDevice;
+    private CameraCaptureSession mSession;
+    private ImageReader mImageReader;
     private boolean mIsCameraOrientationActive;
     private byte[] frameData;
-    private FrameListener.FrameCallback mFrameCallback;
     private boolean cameraRunning;
 
     public FrameListener(Context ctx, int width, int height) {
@@ -109,7 +106,7 @@ public class FrameListener {
     private boolean isProcessing = false;
 
     private int count;
-    private int sample = 5;
+    private int sample = 100;
     /**
      * Listens for frames and send them to  be processed
      */
@@ -123,14 +120,9 @@ public class FrameListener {
 
                     image = reader.acquireLatestImage();
                     ByteBuffer buffer = image.getPlanes()[0].getBuffer();
-                    byte[] bytes = new byte[buffer.capacity()];
-                    buffer.get(bytes);
-                    bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                    frameData = ImageUtils.getNV21(bitmap.getWidth(), bitmap.getHeight(), bitmap);
+                    frameData = new byte[buffer.capacity()];
+                    buffer.get(frameData);
 
-                    if (mFrameCallback != null) {
-                        mFrameCallback.onFrame(frameData);
-                    }
                     mHandler.post(doImageTracker);
 
                     if(count++==sample){
@@ -154,12 +146,12 @@ public class FrameListener {
     /**
      * Starts a builtin camera with api camera 2
      */
-    public void startCamera() {
+    private void startCamera() {
         CameraManager manager = (CameraManager) ctx.getSystemService(Context.CAMERA_SERVICE);
         try {
             String pickedCamera = getCamera(manager);
             manager.openCamera(pickedCamera, cameraStateCallback, null);
-            mImageReader = ImageReader.newInstance(mWidth, mHeight, ImageFormat.JPEG, 2 /* images buffered */);
+            mImageReader = ImageReader.newInstance(mWidth, mHeight, ImageFormat.YUV_420_888, 2 /* images buffered */);
             mImageReader.setOnImageAvailableListener(onImageAvailableListener, null);
             Log.d(TAG, "imageReader created");
         } catch (CameraAccessException e) {
@@ -213,11 +205,6 @@ public class FrameListener {
             Log.e(TAG, e.getMessage());
             return null;
         }
-    }
-
-
-    public void setFrameCallback(FrameCallback frameCallback) {
-        mFrameCallback = frameCallback;
     }
 
     public void onStop() {
