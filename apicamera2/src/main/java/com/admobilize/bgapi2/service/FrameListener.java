@@ -20,7 +20,6 @@ import com.admobilize.bgapi2.streamer.MemoryOutputStream;
 import com.admobilize.bgapi2.streamer.MovingAverage;
 import com.admobilize.lib.NativeProcess;
 
-import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 /**
@@ -159,17 +158,17 @@ public class FrameListener {
                     }
                     // process image
                     image = reader.acquireLatestImage();
-                    frameData = ImageUtils.imageToByteArray(image);
+                    if(image!=null){
+                        frameData = ImageUtils.imageToByteArray(image);
+                        image.close();
+                    }
 //                    ByteBuffer buffer = image.getPlanes()[0].getBuffer();
 //                    frameData = new byte[buffer.capacity()];
 //                    buffer.get(frameData);
-                    if(streamer!=null)streamer.streamJpeg(frameData, frameData.length, timestamp);
-                    // Clean up
-                    mJpegOutputStream.seek(0);
+
                     mHandler.post(doImageTracker);
                     mLastTimestamp = timestampSeconds;
 
-                    image.close();
                 }
 
             } catch (Exception e) {
@@ -262,6 +261,10 @@ public class FrameListener {
         public void run() {
             isProcessing = true;
             if (frameData != null){
+                final Long timestamp = SystemClock.elapsedRealtime();
+                if(streamer!=null)streamer.streamJpeg(frameData, frameData.length, timestamp);
+                // Clean up
+                mJpegOutputStream.seek(0);
                 np.stringFromJNI(frameData);
             }
             isProcessing = false;
